@@ -1,9 +1,10 @@
-import { Box, Center } from "@hope-ui/solid"
+import { Box, Center, VStack } from "@hope-ui/solid"
 import { Show, createMemo, createSignal, onCleanup, onMount } from "solid-js"
 import { useRouter, useLink, useFetch } from "~/hooks"
-import { getMainColor, getSettingBool, objStore, password } from "~/store"
+import { getMainColor, getSettingBool, objStore, password, me } from "~/store"
 import { ObjType, PResp } from "~/types"
 import { ext, handleResp, notify, r, pathDir, pathJoin } from "~/utils"
+import MediaMarks from "~/components/MediaMarks"
 import Artplayer from "artplayer"
 import { type Option } from "artplayer/types/option"
 import { type Setting } from "artplayer/types/setting"
@@ -394,14 +395,41 @@ const Preview = () => {
   })
   const [autoNext, setAutoNext] = createSignal()
   const [warnVisible, setWarnVisible] = createSignal(false)
+
+  // Media marks functionality
+  const handleJumpToTime = (timeInSeconds: number) => {
+    if (player) {
+      player.seek = timeInSeconds
+      if (!player.playing) {
+        player.play()
+      }
+    }
+  }
+
+  const getCurrentTime = () => {
+    return player ? player.currentTime : 0
+  }
+
+  const isLoggedIn = () => {
+    const user = me()
+    return !!(user && user.id)
+  }
+
   return (
     <VideoBox onAutoNextChange={setAutoNext}>
-      <Box w="$full" h="60vh" id="video-player" />
-      <Show when={warnVisible()}>
-        <Center w="100%" h="60vh" bgColor="black">
-          <TiWarning size="4rem" />
-        </Center>
-      </Show>
+      <VStack w="$full" spacing="$4" alignItems="stretch">
+        <Box w="$full" h="60vh" id="video-player" />
+        <Show when={warnVisible()}>
+          <Center w="100%" h="60vh" bgColor="black">
+            <TiWarning size="4rem" />
+          </Center>
+        </Show>
+        <MediaMarks
+          onJumpTo={handleJumpToTime}
+          getCurrentTime={getCurrentTime}
+          isLoggedIn={isLoggedIn()}
+        />
+      </VStack>
     </VideoBox>
   )
 }

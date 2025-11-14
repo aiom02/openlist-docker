@@ -1,12 +1,13 @@
 import "aplayer/dist/APlayer.min.css"
 import "./audio.css"
 import APlayer from "aplayer"
-import { Box } from "@hope-ui/solid"
+import { Box, VStack } from "@hope-ui/solid"
 import { onCleanup, onMount } from "solid-js"
 import { useLink, useRouter, useTitle } from "~/hooks"
-import { getMainColor, getSetting, getSettingBool, objStore } from "~/store"
+import { getMainColor, getSetting, getSettingBool, objStore, me } from "~/store"
 import { ObjType, StoreObj } from "~/types"
 import { baseName, fsGet } from "~/utils"
+import MediaMarks from "~/components/MediaMarks"
 
 const Preview = () => {
   const { proxyLink, rawLink, previewPage } = useLink()
@@ -132,7 +133,34 @@ const Preview = () => {
   onCleanup(() => {
     ap?.destroy()
   })
-  return <Box w="$full" id="audio-player" />
+  
+  // Media marks functionality
+  const handleJumpToTime = (timeSecond: number) => {
+    if (ap) {
+      ap.seek(timeSecond)
+      ap.play()
+    }
+  }
+  
+  const getCurrentTime = () => {
+    return ap ? ap.audio.currentTime : 0
+  }
+  
+  const isLoggedIn = () => {
+    const user = me()
+    return user && user.id && !user.guest
+  }
+  
+  return (
+    <VStack w="$full" spacing="$4" alignItems="stretch">
+      <Box w="$full" id="audio-player" />
+      <MediaMarks
+        onJumpTo={handleJumpToTime}
+        getCurrentTime={getCurrentTime}
+        isLoggedIn={isLoggedIn()}
+      />
+    </VStack>
+  )
 }
 
 export default Preview

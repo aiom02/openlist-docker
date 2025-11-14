@@ -1,7 +1,7 @@
-import { Box } from "@hope-ui/solid"
+import { Box, VStack } from "@hope-ui/solid"
 import { createMemo, createSignal, onCleanup, onMount } from "solid-js"
 import { useRouter, useLink } from "~/hooks"
-import { getMainColor, getSettingBool, objStore } from "~/store"
+import { getMainColor, getSettingBool, objStore, me } from "~/store"
 import { ObjType } from "~/types"
 import { ext, pathDir, pathJoin } from "~/utils"
 import Artplayer from "artplayer"
@@ -16,6 +16,7 @@ import { currentLang } from "~/app/i18n"
 import { AutoHeightPlugin, VideoBox } from "./video_box"
 import { ArtPlayerIconsSubtitle } from "~/components/icons"
 import { useNavigate } from "@solidjs/router"
+import MediaMarks from "~/components/MediaMarks"
 import "./artplayer.css"
 
 const Preview = () => {
@@ -327,9 +328,34 @@ const Preview = () => {
     hlsPlayer?.destroy()
   })
   const [autoNext, setAutoNext] = createSignal()
+  
+  // Media marks functionality
+  const handleJumpToTime = (timeSecond: number) => {
+    if (player) {
+      player.currentTime = timeSecond
+      player.play()
+    }
+  }
+  
+  const getCurrentTime = () => {
+    return player ? player.currentTime : 0
+  }
+  
+  const isLoggedIn = () => {
+    const user = me()
+    return user && user.id && !user.guest
+  }
+  
   return (
     <VideoBox onAutoNextChange={setAutoNext}>
-      <Box w="$full" h="60vh" id="video-player" />
+      <VStack w="$full" spacing="$4" alignItems="stretch">
+        <Box w="$full" h="60vh" id="video-player" />
+        <MediaMarks
+          onJumpTo={handleJumpToTime}
+          getCurrentTime={getCurrentTime}
+          isLoggedIn={isLoggedIn()}
+        />
+      </VStack>
     </VideoBox>
   )
 }

@@ -6,6 +6,7 @@ import (
 	stdpath "path"
 	"time"
 
+	"github.com/OpenListTeam/OpenList/v4/internal/conf"
 	"github.com/OpenListTeam/OpenList/v4/internal/driver"
 	"github.com/OpenListTeam/OpenList/v4/internal/errs"
 	"github.com/OpenListTeam/OpenList/v4/internal/model"
@@ -230,6 +231,24 @@ func Other(ctx context.Context, storage driver.Driver, args model.FsOtherArgs) (
 	if err != nil {
 		return nil, errors.WithMessagef(err, "failed to get obj")
 	}
+	
+	// Handle media marks methods
+	switch args.Method {
+	case "media_marks_list":
+		user := ctx.Value(conf.UserKey).(*model.User)
+		return HandleMediaMarksList(ctx, storage, obj, user)
+	case "media_marks_create":
+		user := ctx.Value(conf.UserKey).(*model.User)
+		return HandleMediaMarksCreate(ctx, storage, obj, user, args.Data)
+	case "media_marks_update":
+		user := ctx.Value(conf.UserKey).(*model.User)
+		return HandleMediaMarksUpdate(ctx, storage, obj, user, args.Data)
+	case "media_marks_delete":
+		user := ctx.Value(conf.UserKey).(*model.User)
+		return HandleMediaMarksDelete(ctx, storage, obj, user, args.Data)
+	}
+	
+	// Default behavior: delegate to storage driver
 	if o, ok := storage.(driver.Other); ok {
 		return o.Other(ctx, model.OtherArgs{
 			Obj:    obj,
