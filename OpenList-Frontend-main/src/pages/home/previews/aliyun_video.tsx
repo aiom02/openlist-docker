@@ -1,10 +1,11 @@
-import { Box, Center, VStack } from "@hope-ui/solid"
+import { Box, Center, VStack, HStack } from "@hope-ui/solid"
 import { Show, createMemo, createSignal, onCleanup, onMount } from "solid-js"
 import { useRouter, useLink, useFetch } from "~/hooks"
 import { getMainColor, getSettingBool, objStore, password, me } from "~/store"
 import { ObjType, PResp } from "~/types"
 import { ext, handleResp, notify, r, pathDir, pathJoin } from "~/utils"
 import MediaMarks from "~/components/MediaMarks"
+import { VideoMenuButton, VideoFavoriteControl } from "~/components"
 import Artplayer from "artplayer"
 import { type Option } from "artplayer/types/option"
 import { type Setting } from "artplayer/types/setting"
@@ -424,6 +425,7 @@ const Preview = () => {
             <TiWarning size="4rem" />
           </Center>
         </Show>
+        <VideoFavoriteControl isLoggedIn={isLoggedIn()} />
         <MediaMarks
           onJumpTo={handleJumpToTime}
           getCurrentTime={getCurrentTime}

@@ -3,16 +3,18 @@ import { createMemo, Show } from "solid-js"
 import { RightIcon } from "./Icon"
 import { CgMoreO } from "solid-icons/cg"
 import { TbCheckbox } from "solid-icons/tb"
-import { objStore, selectAll, State, toggleCheckbox, userCan } from "~/store"
+import { objStore, selectAll, State, toggleCheckbox, userCan, me } from "~/store"
 import { bus } from "~/utils"
 import { operations } from "./operations"
 import { IoMagnetOutline } from "solid-icons/io"
-import { AiOutlineCloudUpload, AiOutlineSetting } from "solid-icons/ai"
+import { AiOutlineCloudUpload, AiOutlineSetting, AiOutlineHeart, AiOutlineAudio } from "solid-icons/ai"
+import { BsBookmarks } from "solid-icons/bs"
 import { RiSystemRefreshLine } from "solid-icons/ri"
 import { usePath, useRouter } from "~/hooks"
 import { Motion } from "solid-motionone"
 import { isTocVisible, setTocDisabled } from "~/components"
 import { BiSolidBookContent } from "solid-icons/bi"
+import { useNavigate } from "@solidjs/router"
 
 export const Right = () => {
   const { isOpen, onToggle } = createDisclosure({
@@ -24,6 +26,12 @@ export const Right = () => {
   const isFolder = createMemo(() => objStore.state === State.Folder)
   const { refresh } = usePath()
   const { isShare } = useRouter()
+  const navigate = useNavigate()
+  
+  const isLoggedIn = createMemo(() => {
+    const user = me()
+    return user && user.id && !user.guest
+  })
   return (
     <Box
       class="left-toolbar-box"
@@ -135,6 +143,33 @@ export const Right = () => {
                 tips="toggle_markdown_toc"
                 onClick={() => {
                   setTocDisabled((disabled) => !disabled)
+                }}
+              />
+            </Show>
+            <Show when={isLoggedIn()}>
+              <RightIcon
+                as={AiOutlineHeart}
+                tips="my_favorites"
+                onClick={() => {
+                  navigate("/video-favorites")
+                }}
+              />
+            </Show>
+            <Show when={isLoggedIn()}>
+              <RightIcon
+                as={AiOutlineAudio}
+                tips="my_audio_favorites"
+                onClick={() => {
+                  navigate("/audio-favorites")
+                }}
+              />
+            </Show>
+            <Show when={isLoggedIn()}>
+              <RightIcon
+                as={BsBookmarks}
+                tips="my_media_marks"
+                onClick={() => {
+                  navigate("/media-marks")
                 }}
               />
             </Show>

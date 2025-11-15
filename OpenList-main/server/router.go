@@ -105,6 +105,8 @@ func Init(e *gin.Engine) {
 	fsAndShare(api.Group("/fs", middlewares.Auth(true)))
 	_task(auth.Group("/task", middlewares.AuthNotGuest))
 	_sharing(auth.Group("/share", middlewares.AuthNotGuest))
+	_videoFavorites(auth.Group("/video_favorites", middlewares.AuthNotGuest))
+	_audioFavorites(auth.Group("/audio_favorites", middlewares.AuthNotGuest))
 	admin(auth.Group("/admin", middlewares.AuthAdmin))
 	if flags.Debug || flags.Dev {
 		debug(g.Group("/debug"))
@@ -227,6 +229,44 @@ func _sharing(g *gin.RouterGroup) {
 	g.POST("/delete", handles.DeleteSharing)
 	g.POST("/enable", handles.SetEnableSharing(false))
 	g.POST("/disable", handles.SetEnableSharing(true))
+}
+
+func _videoFavorites(g *gin.RouterGroup) {
+	// Folder operations
+	folder := g.Group("/folder")
+	folder.GET("/list", handles.ListVideoFavoriteFolders)
+	folder.GET("/get", handles.GetVideoFavoriteFolder)
+	folder.POST("/create", handles.CreateVideoFavoriteFolder)
+	folder.POST("/update", handles.UpdateVideoFavoriteFolder)
+	folder.POST("/delete", handles.DeleteVideoFavoriteFolder)
+
+	// Video operations
+	g.GET("/list", handles.ListVideoFavorites)
+	g.POST("/create", handles.CreateVideoFavorite)
+	g.POST("/update", handles.UpdateVideoFavorite)
+	g.POST("/delete", handles.DeleteVideoFavorite)
+
+	// Get all video marks
+	g.GET("/all_marks", handles.ListAllVideoMarks)
+}
+
+func _audioFavorites(g *gin.RouterGroup) {
+	// Folder operations
+	folder := g.Group("/folder")
+	folder.GET("/list", handles.ListAudioFavoriteFolders)
+	folder.GET("/get", handles.GetAudioFavoriteFolder)
+	folder.POST("/create", handles.CreateAudioFavoriteFolder)
+	folder.POST("/update", handles.UpdateAudioFavoriteFolder)
+	folder.POST("/delete", handles.DeleteAudioFavoriteFolder)
+
+	// Audio operations
+	g.GET("/list", handles.ListAudioFavorites)
+	g.POST("/create", handles.CreateAudioFavorite)
+	g.POST("/update", handles.UpdateAudioFavorite)
+	g.POST("/delete", handles.DeleteAudioFavorite)
+
+	// Get all audio marks
+	g.GET("/all_marks", handles.ListAllAudioMarks)
 }
 
 func Cors(r *gin.Engine) {

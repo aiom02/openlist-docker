@@ -1,13 +1,14 @@
 import "aplayer/dist/APlayer.min.css"
 import "./audio.css"
 import APlayer from "aplayer"
-import { Box, VStack } from "@hope-ui/solid"
+import { Box, VStack, HStack } from "@hope-ui/solid"
 import { onCleanup, onMount } from "solid-js"
 import { useLink, useRouter, useTitle } from "~/hooks"
 import { getMainColor, getSetting, getSettingBool, objStore, me } from "~/store"
 import { ObjType, StoreObj } from "~/types"
 import { baseName, fsGet } from "~/utils"
 import MediaMarks from "~/components/MediaMarks"
+import { AudioFavoriteControl } from "~/components"
 
 const Preview = () => {
   const { proxyLink, rawLink, previewPage } = useLink()
@@ -154,6 +155,7 @@ const Preview = () => {
   return (
     <VStack w="$full" spacing="$4" alignItems="stretch">
       <Box w="$full" id="audio-player" />
+      <AudioFavoriteControl isLoggedIn={isLoggedIn()} />
       <MediaMarks
         onJumpTo={handleJumpToTime}
         getCurrentTime={getCurrentTime}

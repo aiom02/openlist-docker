@@ -1,4 +1,4 @@
-import { Box, VStack } from "@hope-ui/solid"
+import { Box, VStack, HStack } from "@hope-ui/solid"
 import { createMemo, createSignal, onCleanup, onMount } from "solid-js"
 import { useRouter, useLink } from "~/hooks"
 import { getMainColor, getSettingBool, objStore, me } from "~/store"
@@ -17,6 +17,7 @@ import { AutoHeightPlugin, VideoBox } from "./video_box"
 import { ArtPlayerIconsSubtitle } from "~/components/icons"
 import { useNavigate } from "@solidjs/router"
 import MediaMarks from "~/components/MediaMarks"
+import { VideoMenuButton, VideoFavoriteControl } from "~/components"
 import "./artplayer.css"
 
 const Preview = () => {
@@ -350,6 +351,7 @@ const Preview = () => {
     <VideoBox onAutoNextChange={setAutoNext}>
       <VStack w="$full" spacing="$4" alignItems="stretch">
         <Box w="$full" h="60vh" id="video-player" />
+        <VideoFavoriteControl isLoggedIn={isLoggedIn()} />
         <MediaMarks
           onJumpTo={handleJumpToTime}
           getCurrentTime={getCurrentTime}

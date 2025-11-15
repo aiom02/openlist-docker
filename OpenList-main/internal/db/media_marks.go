@@ -39,3 +39,12 @@ func DeleteMediaMarkByIdAndUser(id uint, userId uint) error {
 	}
 	return nil
 }
+
+// ListAllMediaMarksByUser returns all media marks for a user
+func ListAllMediaMarksByUser(userId uint) ([]model.MediaMark, error) {
+	var marks []model.MediaMark
+	if err := db.Where("user_id = ?", userId).Order("fingerprint, time_second ASC").Find(&marks).Error; err != nil {
+		return nil, errors.Wrapf(err, "failed to list all media marks")
+	}
+	return marks, nil
+}

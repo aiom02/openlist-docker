@@ -23,6 +23,9 @@ import { globalStyles } from "./theme"
 const Home = lazy(() => import("~/pages/home/Layout"))
 const Manage = lazy(() => import("~/pages/manage"))
 const Login = lazy(() => import("~/pages/login"))
+const VideoFavorites = lazy(() => import("~/pages/video-favorites"))
+const AudioFavorites = lazy(() => import("~/pages/audio-favorites"))
+const MediaMarks = lazy(() => import("~/pages/media-marks"))
 const Test = lazy(() => import("~/pages/test"))
 
 const App: Component = () => {
@@ -88,6 +91,30 @@ const App: Component = () => {
               element={
                 <MustUser>
                   <Manage />
+                </MustUser>
+              }
+            />
+            <Route
+              path="/video-favorites"
+              element={
+                <MustUser>
+                  <VideoFavorites />
+                </MustUser>
+              }
+            />
+            <Route
+              path="/audio-favorites"
+              element={
+                <MustUser>
+                  <AudioFavorites />
+                </MustUser>
+              }
+            />
+            <Route
+              path="/media-marks"
+              element={
+                <MustUser>
+                  <MediaMarks />
                 </MustUser>
               }
             />
