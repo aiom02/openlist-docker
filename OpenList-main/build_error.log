@@ -1,3 +1,8 @@
 runtime/cgo
+github.com/OpenListTeam/OpenList/v4/internal/model
 # runtime/cgo
 cc1.exe: sorry, unimplemented: 64-bit mode not compiled in
+github.com/OpenListTeam/OpenList/v4/internal/db
+github.com/OpenListTeam/OpenList/v4/public
+github.com/OpenListTeam/OpenList/v4/server/static
+github.com/OpenListTeam/OpenList/v4/server
