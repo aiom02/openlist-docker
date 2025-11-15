@@ -1,0 +1,171 @@
+========================================
+OpenList Docker 快速部署指令
+========================================
+
+你已完成：✅ 构建镜像  ✅ 导出 tar  ✅ 上传文件
+
+接下来按顺序执行：
+
+
+一、在服务器上加载镜像
+========================================
+
+# 1. SSH 连接到服务器
+ssh root@你的服务器IP
+
+# 2. 进入文件目录
+cd /root
+
+# 3. 检查文件是否存在
+ls -lh openlist-*.tar
+
+# 4. 加载后端镜像（需要几分钟）
+docker load -i openlist-backend.tar
+
+# 5. 加载前端镜像
+docker load -i openlist-frontend.tar
+
+# 6. 验证镜像
+docker images | grep openlist
+
+
+二、创建运行环境
+========================================
+
+# 7. 创建数据目录
+mkdir -p /root/data
+
+# 8. 创建 Docker 网络
+docker network create openlist-network
+
+
+三、启动服务
+========================================
+
+# 9. 启动后端容器
+docker run -d \
+  --name openlist-backend \
+  --network openlist-network \
+  -p 5244:5244 \
+  -v /root/data:/app/data \
+  --restart unless-stopped \
+  openlist-backend:latest
+
+# 10. 启动前端容器
+docker run -d \
+  --name openlist-frontend \
+  --network openlist-network \
+  -p 80:80 \
+  --restart unless-stopped \
+  openlist-frontend:latest
+
+
+四、验证部署
+========================================
+
+# 11. 查看容器状态
+docker ps
+
+# 12. 查看后端日志
+docker logs openlist-backend
+
+# 13. 获取服务器 IP
+curl ifconfig.me
+
+
+五、配置防火墙（重要！）
+========================================
+
+# Ubuntu/Debian
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw enable
+
+# CentOS
+firewall-cmd --permanent --add-service=http
+firewall-cmd --permanent --add-service=https
+firewall-cmd --reload
+
+# 云服务器
+在阿里云/腾讯云控制台的安全组中开放 80 和 443 端口
+
+
+六、访问网站
+========================================
+
+浏览器打开：http://你的服务器IP
+
+
+========================================
+常用管理命令
+========================================
+
+# 查看容器状态
+docker ps
+
+# 查看日志
+docker logs -f openlist-backend
+docker logs -f openlist-frontend
+
+# 重启服务
+docker restart openlist-backend openlist-frontend
+
+# 停止服务
+docker stop openlist-backend openlist-frontend
+
+# 启动服务
+docker start openlist-backend openlist-frontend
+
+# 进入容器
+docker exec -it openlist-backend sh
+
+
+========================================
+快速故障排查
+========================================
+
+# 1. 容器无法启动？
+docker logs openlist-backend
+# 查看错误日志
+
+# 2. 无法访问网站？
+docker ps  # 检查容器是否运行
+curl http://localhost  # 本地测试
+
+# 3. 端口被占用？
+netstat -tulpn | grep :80
+
+# 4. 清理重新部署
+docker stop openlist-backend openlist-frontend
+docker rm openlist-backend openlist-frontend
+# 然后重新执行启动命令
+
+
+========================================
+一键部署脚本（推荐）
+========================================
+
+或者使用自动化脚本：
+
+# 1. 上传脚本到服务器
+scp 3-服务器加载并运行.sh root@服务器IP:/root/
+
+# 2. 连接到服务器
+ssh root@服务器IP
+
+# 3. 运行脚本
+cd /root
+chmod +x 3-服务器加载并运行.sh
+./3-服务器加载并运行.sh
+
+
+========================================
+完成！
+========================================
+
+访问地址：http://你的服务器IP
+首次访问：创建管理员账号
+数据位置：/root/data/
+
+更多帮助请查看《Docker部署完整流程.md》
+

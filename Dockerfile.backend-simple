@@ -1,0 +1,51 @@
+FROM golang:1.23-alpine AS builder
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache gcc musl-dev
+
+# Copy go mod files
+COPY OpenList-main/go.mod OpenList-main/go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY OpenList-main/ ./
+
+# Build
+RUN CGO_ENABLED=1 GOOS=linux go build \
+    -ldflags="-w -s \
+    -X 'github.com/OpenListTeam/OpenList/v4/internal/conf.BuiltAt=$(date +'%F %T %z')' \
+    -X 'github.com/OpenListTeam/OpenList/v4/internal/conf.GitAuthor=OpenList Team' \
+    -X 'github.com/OpenListTeam/OpenList/v4/internal/conf.GitCommit=docker' \
+    -X 'github.com/OpenListTeam/OpenList/v4/internal/conf.Version=v4.0.0' \
+    -X 'github.com/OpenListTeam/OpenList/v4/internal/conf.WebVersion=v4.0.0'" \
+    -tags=jsoniter \
+    -o openlist .
+
+# Runtime stage
+FROM alpine:latest
+
+RUN apk add --no-cache ca-certificates tzdata bash && \
+    addgroup -g 1001 openlist && \
+    adduser -D -u 1001 -G openlist openlist && \
+    mkdir -p /opt/openlist/data
+
+WORKDIR /opt/openlist
+
+# Copy binary from builder
+COPY --from=builder /app/openlist ./openlist
+RUN chmod 755 ./openlist && chown 1001:1001 ./openlist
+
+# Copy entrypoint script
+COPY OpenList-main/entrypoint.sh /entrypoint.sh
+RUN chmod 755 /entrypoint.sh && chown 1001:1001 /entrypoint.sh
+
+USER openlist
+
+ENV UMASK=022
+VOLUME /opt/openlist/data/
+EXPOSE 5244 5245
+
+CMD ["/entrypoint.sh"]
+

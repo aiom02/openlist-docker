@@ -1,0 +1,254 @@
+========================================
+OpenList 宝塔面板部署 - 文件上传说明
+========================================
+
+一、需要上传的文件
+==================
+
+1. 后端文件
+-----------
+文件名: openlist
+来源: OpenList-main/openlist (Linux 编译版本)
+目标位置: /opt/openlist/openlist
+文件大小: 约 50-80MB
+
+编译方法（在 Windows PowerShell 中）：
+  cd OpenList-main
+  $env:GOOS="linux"
+  $env:GOARCH="amd64"
+  $env:CGO_ENABLED=0
+  go build -o openlist main.go
+
+
+2. 前端文件
+-----------
+文件夹: dist/
+来源: OpenList-Frontend-main/dist/
+目标位置: /opt/openlist/public/dist/
+文件数量: 约 100+ 个文件
+
+构建方法（在本地终端中）：
+  cd OpenList-Frontend-main
+  pnpm install
+  pnpm run build
+
+
+二、上传方法
+============
+
+方法一：宝塔面板上传（推荐新手）
+--------------------------------
+1. 打包文件（在本地）
+   - 将 dist 文件夹压缩为 dist.zip
+   - openlist 文件不需要压缩
+
+2. 登录宝塔面板
+   - 访问 http://你的服务器IP:8888
+   - 输入用户名和密码
+
+3. 上传后端文件
+   - 左侧菜单 → 文件
+   - 进入 /opt/openlist/ 目录
+   - 点击"上传"按钮
+   - 选择 openlist 文件
+   - 等待上传完成
+   - 右键文件 → 权限 → 设置为 755
+
+4. 上传前端文件
+   - 进入 /opt/openlist/public/ 目录
+   - 上传 dist.zip
+   - 右键 dist.zip → 解压
+   - 删除 dist.zip（可选）
+
+优点：简单直观，无需命令行
+缺点：速度较慢，不适合大文件
+
+
+方法二：SCP 命令上传（推荐熟手）
+--------------------------------
+在本地 PowerShell 或终端中执行：
+
+# 上传后端文件
+scp openlist root@你的服务器IP:/opt/openlist/
+
+# 上传前端文件
+scp -r dist/* root@你的服务器IP:/opt/openlist/public/dist/
+
+# 设置权限（连接到服务器后）
+ssh root@你的服务器IP
+chmod +x /opt/openlist/openlist
+
+优点：速度快，适合大文件
+缺点：需要 SSH 访问权限
+
+
+方法三：FTP/SFTP 客户端上传
+---------------------------
+推荐工具：
+- FileZilla (免费)
+- WinSCP (免费，Windows)
+- Transmit (Mac)
+
+步骤：
+1. 打开 FTP 客户端
+2. 连接信息：
+   - 协议: SFTP
+   - 主机: 你的服务器IP
+   - 端口: 22
+   - 用户名: root
+   - 密码: 你的服务器密码
+
+3. 连接成功后：
+   - 本地：选择编译好的文件
+   - 远程：导航到 /opt/openlist/
+   - 拖拽上传
+
+优点：可视化界面，支持断点续传
+缺点：需要安装额外软件
+
+
+方法四：Git 克隆（开发者）
+--------------------------
+如果你的代码在 Git 仓库中：
+
+ssh root@你的服务器IP
+
+# 安装 Git
+apt install git -y
+
+# 克隆仓库
+cd /opt
+git clone https://github.com/你的用户名/openlist.git
+
+# 编译后端（需要服务器上安装 Go）
+cd openlist/OpenList-main
+go build -o openlist main.go
+
+# 构建前端（需要服务器上安装 Node.js 和 pnpm）
+cd ../OpenList-Frontend-main
+pnpm install
+pnpm run build
+
+优点：适合频繁更新
+缺点：需要在服务器安装编译环境
+
+
+三、验证上传
+============
+
+上传完成后，在宝塔终端或 SSH 中执行：
+
+# 检查后端文件
+ls -lh /opt/openlist/openlist
+# 应该显示一个约 50-80MB 的可执行文件
+
+# 检查前端文件
+ls -la /opt/openlist/public/dist/
+# 应该看到 index.html 和其他资源文件
+
+# 检查文件权限
+ls -l /opt/openlist/openlist
+# 应该显示 -rwxr-xr-x (755)
+
+# 如果权限不对，执行：
+chmod +x /opt/openlist/openlist
+
+
+四、目录结构参考
+================
+
+上传完成后，目录结构应该是：
+
+/opt/openlist/
+├── openlist                    # 后端可执行文件 (你上传的)
+├── data/
+│   ├── config.json            # 配置文件 (脚本自动创建)
+│   ├── data.db                # 数据库 (首次运行自动创建)
+│   ├── temp/                  # 临时文件夹
+│   └── log/                   # 日志文件夹
+│       └── log.log            # 运行日志
+└── public/
+    └── dist/                  # 前端文件 (你上传的)
+        ├── index.html         # 必须存在！
+        ├── assets/
+        │   ├── *.js
+        │   ├── *.css
+        │   └── *.woff
+        ├── favicon.ico
+        └── ...
+
+
+五、常见问题
+============
+
+Q: 上传后文件大小为 0？
+A: 可能是上传失败，删除后重新上传。
+
+Q: 显示"权限被拒绝"？
+A: 执行 chmod +x /opt/openlist/openlist
+
+Q: 前端页面空白？
+A: 检查 /opt/openlist/public/dist/index.html 是否存在
+
+Q: 上传速度太慢？
+A: 
+  1. 尝试使用 SCP 命令
+  2. 考虑在服务器上直接编译
+  3. 使用国内服务器或 CDN
+
+Q: 宝塔上传有大小限制？
+A: 
+  1. 面板设置 → 面板设置 → 上传文件大小限制
+  2. 默认 100MB，可以调整到更大
+  3. 或者使用命令行上传
+
+
+六、性能优化建议
+================
+
+1. 开启 Gzip 压缩
+   - 宝塔 → 软件商店 → Nginx → 设置 → 性能调整
+   - 开启 Gzip，等级设置为 6
+
+2. 静态文件缓存
+   - 在 Nginx 配置中已包含缓存设置
+   - 前端静态资源会缓存 1 年
+
+3. 使用 CDN
+   - 如果用户分布广泛，考虑使用 CDN
+   - 推荐：阿里云 CDN、腾讯云 CDN
+
+4. 定期清理
+   - 定期清理 /opt/openlist/data/temp/ 临时文件
+   - 定期备份数据库
+
+
+七、更新部署
+============
+
+后端更新：
+  1. systemctl stop openlist
+  2. 备份旧文件: cp openlist openlist.backup
+  3. 上传新的 openlist 文件
+  4. chmod +x openlist
+  5. systemctl start openlist
+
+前端更新：
+  1. 删除 /opt/openlist/public/dist/* 中的旧文件
+  2. 上传新的 dist 文件
+  3. 无需重启服务
+
+
+八、技术支持
+============
+
+如果遇到问题：
+1. 查看日志: /opt/openlist/data/log/log.log
+2. 查看服务状态: systemctl status openlist
+3. 查看 Nginx 日志: /www/wwwlogs/openlist_error.log
+4. GitHub Issues: https://github.com/OpenListTeam/OpenList/issues
+
+========================================
+完成上传后，继续参考《宝塔面板部署教程.md》
+========================================
+
