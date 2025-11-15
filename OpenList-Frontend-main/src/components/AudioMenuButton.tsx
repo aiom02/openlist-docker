@@ -118,7 +118,7 @@ export function AudioMenuButton(props: AudioMenuButtonProps) {
   }
 
   const handleViewFavorites = () => {
-    navigate("/audio-favorites")
+    navigate("/favorites")
   }
 
   const handleViewAllMarks = () => {

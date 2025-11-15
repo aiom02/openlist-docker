@@ -107,6 +107,7 @@ func Init(e *gin.Engine) {
 	_sharing(auth.Group("/share", middlewares.AuthNotGuest))
 	_videoFavorites(auth.Group("/video_favorites", middlewares.AuthNotGuest))
 	_audioFavorites(auth.Group("/audio_favorites", middlewares.AuthNotGuest))
+	_imageFavorites(auth.Group("/image_favorites", middlewares.AuthNotGuest))
 	admin(auth.Group("/admin", middlewares.AuthAdmin))
 	if flags.Debug || flags.Dev {
 		debug(g.Group("/debug"))
@@ -267,6 +268,22 @@ func _audioFavorites(g *gin.RouterGroup) {
 
 	// Get all audio marks
 	g.GET("/all_marks", handles.ListAllAudioMarks)
+}
+
+func _imageFavorites(g *gin.RouterGroup) {
+	// Folder operations
+	folder := g.Group("/folder")
+	folder.GET("/list", handles.ListImageFavoriteFolders)
+	folder.GET("/get", handles.GetImageFavoriteFolder)
+	folder.POST("/create", handles.CreateImageFavoriteFolder)
+	folder.POST("/update", handles.UpdateImageFavoriteFolder)
+	folder.POST("/delete", handles.DeleteImageFavoriteFolder)
+
+	// Image operations
+	g.GET("/list", handles.ListImageFavorites)
+	g.POST("/create", handles.CreateImageFavorite)
+	g.POST("/update", handles.UpdateImageFavorite)
+	g.POST("/delete", handles.DeleteImageFavorite)
 }
 
 func Cors(r *gin.Engine) {

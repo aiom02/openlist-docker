@@ -118,7 +118,7 @@ export function VideoMenuButton(props: VideoMenuButtonProps) {
   }
 
   const handleViewFavorites = () => {
-    navigate("/video-favorites")
+    navigate("/favorites")
   }
 
   const handleViewAllMarks = () => {

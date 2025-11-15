@@ -28,7 +28,7 @@ import {
   deleteAudioFavorite,
 } from "~/utils/audio-favorites"
 import type { AudioFavoriteFolder, AudioFavorite } from "~/types/audio-favorite"
-import { notify } from "~/utils"
+import { notify, encodePath } from "~/utils"
 import { RiSystemDeleteBinLine } from "solid-icons/ri"
 import { AiOutlineAudio, AiOutlineArrowLeft } from "solid-icons/ai"
 import { useNavigate } from "@solidjs/router"
@@ -141,7 +141,8 @@ export default function AudioFavoritesPage() {
 
   const handlePlayAudio = (audio: AudioFavorite) => {
     // Navigate to audio file
-    to(audio.original_path)
+    // Use encodePath to handle special characters in filename
+    to(encodePath(audio.original_path))
   }
 
   return (

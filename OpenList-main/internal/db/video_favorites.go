@@ -36,7 +36,7 @@ func DeleteVideoFavoriteFolderById(id uint, userId uint) error {
 	if err := db.Where("folder_id = ? AND user_id = ?", id, userId).Delete(&model.VideoFavorite{}).Error; err != nil {
 		return errors.Wrapf(err, "failed to delete favorites in folder")
 	}
-	
+
 	// Then delete the folder
 	result := db.Where("id = ? AND user_id = ?", id, userId).Delete(&model.VideoFavoriteFolder{})
 	if result.Error != nil {
@@ -100,4 +100,3 @@ func DeleteVideoFavoriteById(id uint, userId uint) error {
 	}
 	return nil
 }
-

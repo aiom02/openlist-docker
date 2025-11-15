@@ -151,16 +151,7 @@ export const Right = () => {
                 as={AiOutlineHeart}
                 tips="my_favorites"
                 onClick={() => {
-                  navigate("/video-favorites")
-                }}
-              />
-            </Show>
-            <Show when={isLoggedIn()}>
-              <RightIcon
-                as={AiOutlineAudio}
-                tips="my_audio_favorites"
-                onClick={() => {
-                  navigate("/audio-favorites")
+                  navigate("/favorites")
                 }}
               />
             </Show>

@@ -1,4 +1,20 @@
-import { Box, VStack, HStack, Text, Button } from "@hope-ui/solid"
+import { 
+  Box, 
+  VStack, 
+  HStack, 
+  Text, 
+  Button,
+  Input,
+  Textarea,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalCloseButton,
+  createDisclosure,
+} from "@hope-ui/solid"
 import { createSignal, createEffect, For, Show } from "solid-js"
 import type { MediaMark } from "~/types/media-mark"
 import { listMediaMarks, createMediaMark, deleteMediaMark } from "~/utils/media-marks"
@@ -15,9 +31,11 @@ export default function MediaMarks(props: MediaMarksProps) {
   const { pathname } = useRouter()
   const [marks, setMarks] = createSignal<MediaMark[]>([])
   const [loading, setLoading] = createSignal(false)
-  const [showAddForm, setShowAddForm] = createSignal(false)
   const [newTitle, setNewTitle] = createSignal("")
   const [newContent, setNewContent] = createSignal("")
+  
+  // Modal control
+  const addMarkModal = createDisclosure()
 
   // Load marks when component mounts or path changes
   createEffect(() => {
@@ -56,7 +74,7 @@ export default function MediaMarks(props: MediaMarksProps) {
 
   const handleAddMark = async () => {
     if (!newTitle().trim()) {
-      notify.error("Please enter a title")
+      notify.error("请输入标记标题")
       return
     }
 
@@ -67,29 +85,29 @@ export default function MediaMarks(props: MediaMarksProps) {
         title: newTitle(),
         content: newContent()
       })
-      notify.success("Mark created successfully")
+      notify.success("标记添加成功")
       setNewTitle("")
       setNewContent("")
-      setShowAddForm(false)
+      addMarkModal.onClose()
       await loadMarks()
     } catch (error) {
       console.error("Failed to create mark:", error)
-      notify.error("Failed to create mark")
+      notify.error("添加标记失败")
     }
   }
 
   const handleDeleteMark = async (mark: MediaMark) => {
-    if (!confirm(`Are you sure you want to delete "${mark.title}"?`)) {
+    if (!confirm(`确定要删除标记 "${mark.title}" 吗？`)) {
       return
     }
 
     try {
       await deleteMediaMark(pathname(), { id: mark.id })
-      notify.success("Mark deleted successfully")
+      notify.success("标记删除成功")
       await loadMarks()
     } catch (error) {
       console.error("Failed to delete mark:", error)
-      notify.error("Failed to delete mark")
+      notify.error("删除标记失败")
     }
   }
 
@@ -98,124 +116,137 @@ export default function MediaMarks(props: MediaMarksProps) {
   }
 
   return (
-    <VStack w="$full" spacing="$2" alignItems="stretch">
-      <HStack justifyContent="space-between" alignItems="center">
-        <Text fontSize="$lg" fontWeight="$semibold">
-          Media Marks ({marks().length})
-        </Text>
-        <Show when={props.isLoggedIn}>
-          <Button
-            size="sm"
-            onClick={() => setShowAddForm(!showAddForm())}
-            colorScheme="accent"
-          >
-            {showAddForm() ? "Cancel" : "Add Mark"}
-          </Button>
-        </Show>
-      </HStack>
+    <>
+      <VStack w="$full" spacing="$2" alignItems="stretch">
+        <HStack justifyContent="space-between" alignItems="center">
+          <Text fontSize="$lg" fontWeight="$semibold">
+            媒体标记 ({marks().length})
+          </Text>
+          <Show when={props.isLoggedIn}>
+            <Button
+              size="sm"
+              onClick={addMarkModal.onOpen}
+              colorScheme="accent"
+            >
+              添加标记
+            </Button>
+          </Show>
+        </HStack>
 
-      <Show when={showAddForm()}>
-        <Box p="$3" borderRadius="$md" border="1px solid $neutral6" bg="$neutral2">
-          <VStack spacing="$2" alignItems="stretch">
-            <Text fontSize="$sm" fontWeight="$medium">Add New Mark</Text>
-            <input
-              type="text"
-              placeholder="Enter mark title"
-              value={newTitle()}
-              onInput={(e) => setNewTitle(e.currentTarget.value)}
-              style={{
-                padding: "8px",
-                border: "1px solid #ccc",
-                "border-radius": "4px",
-                width: "100%"
-              }}
-            />
-            <textarea
-              placeholder="Enter mark description (optional)"
-              value={newContent()}
-              onInput={(e) => setNewContent(e.currentTarget.value)}
-              rows={2}
-              style={{
-                padding: "8px",
-                border: "1px solid #ccc",
-                "border-radius": "4px",
-                width: "100%",
-                resize: "vertical"
-              }}
-            />
+        <Show when={loading()}>
+          <Text fontSize="$sm" color="$neutral11">加载中...</Text>
+        </Show>
+
+        <Show when={!props.isLoggedIn}>
+          <Text fontSize="$sm" color="$neutral11">
+            请登录后使用标记功能
+          </Text>
+        </Show>
+
+        <Show when={props.isLoggedIn && marks().length === 0 && !loading()}>
+          <Text fontSize="$sm" color="$neutral11">
+            暂无标记，点击"添加标记"创建第一个标记
+          </Text>
+        </Show>
+
+        <VStack spacing="$1" alignItems="stretch">
+          <For each={marks()}>
+            {(mark) => (
+              <Box
+                p="$2"
+                borderRadius="$md"
+                border="1px solid $neutral6"
+                style={{ cursor: "pointer" }}
+                onClick={() => handleJumpTo(mark)}
+              >
+                <HStack justifyContent="space-between" alignItems="flex-start">
+                  <VStack alignItems="flex-start" spacing="$1" flex="1">
+                    <HStack spacing="$2" alignItems="center">
+                      <Text fontSize="$sm" fontWeight="$medium" color="$accent10">
+                        {formatTime(mark.time_second)}
+                      </Text>
+                      <Text fontSize="$sm" fontWeight="$semibold">
+                        {mark.title}
+                      </Text>
+                    </HStack>
+                    <Show when={mark.content}>
+                      <Text fontSize="$xs" color="$neutral11" lineHeight="$4">
+                        {mark.content}
+                      </Text>
+                    </Show>
+                  </VStack>
+                  
+                  <Show when={props.isLoggedIn}>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      colorScheme="danger"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteMark(mark)
+                      }}
+                    >
+                      删除
+                    </Button>
+                  </Show>
+                </HStack>
+              </Box>
+            )}
+          </For>
+        </VStack>
+      </VStack>
+
+      {/* 添加标记模态框 */}
+      <Modal opened={addMarkModal.isOpen()} onClose={addMarkModal.onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalCloseButton />
+          <ModalHeader>添加媒体标记</ModalHeader>
+          <ModalBody>
+            <VStack spacing="$3" alignItems="stretch">
+              <Box>
+                <Text fontSize="$sm" mb="$2" fontWeight="$medium">
+                  标记标题 <Text as="span" color="$danger9">*</Text>
+                </Text>
+                <Input
+                  placeholder="输入标记标题"
+                  value={newTitle()}
+                  onInput={(e) => setNewTitle(e.currentTarget.value)}
+                />
+              </Box>
+              <Box>
+                <Text fontSize="$sm" mb="$2" fontWeight="$medium">描述（可选）</Text>
+                <Textarea
+                  placeholder="输入标记描述"
+                  value={newContent()}
+                  onInput={(e) => setNewContent(e.currentTarget.value)}
+                  rows={3}
+                />
+              </Box>
+              <Text fontSize="$xs" color="$neutral11">
+                当前时间点：{formatTime(props.getCurrentTime())}
+              </Text>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
             <HStack spacing="$2">
-              <Button size="sm" onClick={handleAddMark} disabled={!newTitle().trim()}>
-                Create
+              <Button
+                onClick={handleAddMark}
+                disabled={!newTitle().trim()}
+                colorScheme="accent"
+              >
+                添加
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setShowAddForm(false)}>
-                Cancel
+              <Button
+                variant="ghost"
+                onClick={addMarkModal.onClose}
+              >
+                取消
               </Button>
             </HStack>
-          </VStack>
-        </Box>
-      </Show>
-
-      <Show when={loading()}>
-        <Text fontSize="$sm" color="$neutral11">Loading marks...</Text>
-      </Show>
-
-      <Show when={!props.isLoggedIn}>
-        <Text fontSize="$sm" color="$neutral11">
-          Please log in to view and create media marks.
-        </Text>
-      </Show>
-
-      <Show when={props.isLoggedIn && marks().length === 0 && !loading()}>
-        <Text fontSize="$sm" color="$neutral11">
-          No marks yet. Click "Add Mark" to create your first mark.
-        </Text>
-      </Show>
-
-      <VStack spacing="$1" alignItems="stretch">
-        <For each={marks()}>
-          {(mark) => (
-            <Box
-              p="$2"
-              borderRadius="$md"
-              border="1px solid $neutral6"
-              style={{ cursor: "pointer" }}
-              onClick={() => handleJumpTo(mark)}
-            >
-              <HStack justifyContent="space-between" alignItems="flex-start">
-                <VStack alignItems="flex-start" spacing="$1" flex="1">
-                  <HStack spacing="$2" alignItems="center">
-                    <Text fontSize="$sm" fontWeight="$medium" color="$accent10">
-                      {formatTime(mark.time_second)}
-                    </Text>
-                    <Text fontSize="$sm" fontWeight="$semibold">
-                      {mark.title}
-                    </Text>
-                  </HStack>
-                  <Show when={mark.content}>
-                    <Text fontSize="$xs" color="$neutral11" lineHeight="$4">
-                      {mark.content}
-                    </Text>
-                  </Show>
-                </VStack>
-                
-                <Show when={props.isLoggedIn}>
-                  <Button
-                    size="xs"
-                    variant="ghost"
-                    colorScheme="danger"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleDeleteMark(mark)
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </Show>
-              </HStack>
-            </Box>
-          )}
-        </For>
-      </VStack>
-    </VStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   )
 }

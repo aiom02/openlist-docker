@@ -8,6 +8,15 @@ RUN apk add --no-cache bash curl jq gcc git go musl-dev
 COPY go.mod go.sum ./
 RUN go mod download
 COPY ./ ./
+# 初始化 git 仓库（如果不存在），以便 build.sh 可以运行
+RUN if [ ! -d .git ]; then \
+        git config --global user.email "builder@openlist.local" && \
+        git config --global user.name "Docker Builder" && \
+        git init && \
+        git add . && \
+        git commit -m "Docker build" && \
+        git tag -a v4.1.7 -m "Version 4.1.7"; \
+    fi
 RUN bash build.sh release docker
 
 FROM openlistteam/openlist-base-image:${BASE_IMAGE_TAG}

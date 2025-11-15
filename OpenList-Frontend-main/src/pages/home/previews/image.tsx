@@ -1,8 +1,9 @@
-import { Error, FullLoading, ImageWithError } from "~/components"
+import { Error, FullLoading, ImageWithError, ImageFavoriteControl } from "~/components"
 import { useRouter, useT } from "~/hooks"
-import { objStore } from "~/store"
+import { objStore, me } from "~/store"
 import { ObjType } from "~/types"
 import { onCleanup, onMount } from "solid-js"
+import { VStack } from "@hope-ui/solid"
 
 const Preview = () => {
   const t = useT()
@@ -25,14 +26,23 @@ const Preview = () => {
   onCleanup(() => {
     window.removeEventListener("keydown", onKeydown)
   })
+  
+  const isLoggedIn = () => {
+    const user = me()
+    return user && user.id && !user.guest
+  }
+  
   return (
-    <ImageWithError
-      maxH="75vh"
-      rounded="$lg"
-      src={objStore.raw_url}
-      fallback={<FullLoading />}
-      fallbackErr={<Error msg={t("home.preview.failed_load_img")} />}
-    />
+    <VStack w="$full" spacing="$4" alignItems="stretch">
+      <ImageWithError
+        maxH="75vh"
+        rounded="$lg"
+        src={objStore.raw_url}
+        fallback={<FullLoading />}
+        fallbackErr={<Error msg={t("home.preview.failed_load_img")} />}
+      />
+      <ImageFavoriteControl isLoggedIn={isLoggedIn()} />
+    </VStack>
   )
 }
 

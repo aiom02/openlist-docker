@@ -28,7 +28,7 @@ import {
   deleteVideoFavorite,
 } from "~/utils/video-favorites"
 import type { VideoFavoriteFolder, VideoFavorite } from "~/types"
-import { notify } from "~/utils"
+import { notify, encodePath } from "~/utils"
 import { RiSystemDeleteBinLine } from "solid-icons/ri"
 import { AiOutlineVideoCamera, AiOutlineArrowLeft } from "solid-icons/ai"
 import { useNavigate } from "@solidjs/router"
@@ -141,7 +141,8 @@ export default function VideoFavoritesPage() {
 
   const handlePlayVideo = (video: VideoFavorite) => {
     // Navigate to video file
-    to(video.original_path)
+    // Use encodePath to handle special characters in filename
+    to(encodePath(video.original_path))
   }
 
   return (

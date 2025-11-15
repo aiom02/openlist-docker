@@ -15,6 +15,14 @@ import {
   SelectOptionIndicator,
   Input,
   Textarea,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalCloseButton,
+  createDisclosure,
 } from "@hope-ui/solid"
 import { createSignal, createEffect, For, Show } from "solid-js"
 import type { VideoFavoriteFolder } from "~/types"
@@ -27,7 +35,6 @@ import { useRouter } from "~/hooks"
 import { notify } from "~/utils"
 import { objStore } from "~/store"
 import { buildMediaFingerprint } from "~/utils/media-marks"
-import { useNavigate } from "@solidjs/router"
 
 interface VideoFavoriteControlProps {
   isLoggedIn: boolean
@@ -35,18 +42,18 @@ interface VideoFavoriteControlProps {
 
 export default function VideoFavoriteControl(props: VideoFavoriteControlProps) {
   const { pathname } = useRouter()
-  const navigate = useNavigate()
   const [folders, setFolders] = createSignal<VideoFavoriteFolder[]>([])
   const [selectedFolderId, setSelectedFolderId] = createSignal<number | null>(null)
   const [loading, setLoading] = createSignal(false)
-  const [showAddForm, setShowAddForm] = createSignal(false)
-  const [showNewFolderForm, setShowNewFolderForm] = createSignal(false)
-  const [showCreateFolderModal, setShowCreateFolderModal] = createSignal(false)
   const [note, setNote] = createSignal("")
   
   // New folder form fields
   const [newFolderName, setNewFolderName] = createSignal("")
   const [newFolderDesc, setNewFolderDesc] = createSignal("")
+  
+  // Modal controls
+  const addToFavoriteModal = createDisclosure()
+  const createFolderModal = createDisclosure()
 
   // Load folders when component mounts
   createEffect(() => {
@@ -89,8 +96,7 @@ export default function VideoFavoriteControl(props: VideoFavoriteControlProps) {
       notify.success("文件夹创建成功")
       setNewFolderName("")
       setNewFolderDesc("")
-      setShowNewFolderForm(false)
-      setShowCreateFolderModal(false)
+      createFolderModal.onClose()
       
       // Reload folders and select the new one
       await loadFolders()
@@ -101,10 +107,6 @@ export default function VideoFavoriteControl(props: VideoFavoriteControlProps) {
       console.error("Failed to create folder:", error)
       notify.error("创建文件夹失败")
     }
-  }
-  
-  const handleGoToFavorites = () => {
-    navigate("/video-favorites")
   }
 
   const handleAddToFavorite = async () => {
@@ -127,7 +129,8 @@ export default function VideoFavoriteControl(props: VideoFavoriteControlProps) {
       
       notify.success("已添加到收藏")
       setNote("")
-      setShowAddForm(false)
+      setSelectedFolderId(null)
+      addToFavoriteModal.onClose()
     } catch (error) {
       console.error("Failed to add to favorites:", error)
       notify.error("添加到收藏失败")
@@ -135,179 +138,79 @@ export default function VideoFavoriteControl(props: VideoFavoriteControlProps) {
   }
 
   return (
-    <VStack w="$full" spacing="$2" alignItems="stretch">
-      <HStack justifyContent="space-between" alignItems="center">
-        <Text fontSize="$lg" fontWeight="$semibold">
-          视频收藏
-        </Text>
+    <>
+      <HStack w="$full" justifyContent="flex-end" spacing="$2">
         <Show when={props.isLoggedIn}>
-          <HStack spacing="$2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setShowCreateFolderModal(!showCreateFolderModal())}
-            >
-              新建收藏文件夹
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleGoToFavorites}
-            >
-              我的收藏
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setShowAddForm(!showAddForm())}
-              colorScheme="accent"
-            >
-              {showAddForm() ? "取消" : "添加到收藏"}
-            </Button>
-          </HStack>
+          <Button
+            size="sm"
+            onClick={addToFavoriteModal.onOpen}
+            colorScheme="accent"
+          >
+            添加到收藏
+          </Button>
+        </Show>
+        <Show when={!props.isLoggedIn}>
+          <Text fontSize="$sm" color="$neutral11">
+            请登录后使用收藏功能
+          </Text>
         </Show>
       </HStack>
 
-      <Show when={!props.isLoggedIn}>
-        <Text fontSize="$sm" color="$neutral11">
-          请登录后使用收藏功能
-        </Text>
-      </Show>
-
-      {/* Standalone Create Folder Form */}
-      <Show when={showCreateFolderModal()}>
-        <Box p="$3" borderRadius="$md" border="1px solid $neutral6" bg="$neutral2">
-          <VStack spacing="$3" alignItems="stretch">
-            <Text fontSize="$sm" fontWeight="$medium">创建新收藏文件夹</Text>
-            <Input
-              placeholder="文件夹名称"
-              value={newFolderName()}
-              onInput={(e) => setNewFolderName(e.currentTarget.value)}
-            />
-            <Textarea
-              placeholder="描述（可选）"
-              value={newFolderDesc()}
-              onInput={(e) => setNewFolderDesc(e.currentTarget.value)}
-              rows={2}
-            />
-            <HStack spacing="$2">
-              <Button
-                size="sm"
-                onClick={handleCreateFolder}
-                disabled={!newFolderName().trim()}
-                colorScheme="accent"
-              >
-                创建
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => {
-                  setShowCreateFolderModal(false)
-                  setNewFolderName("")
-                  setNewFolderDesc("")
-                }}
-              >
-                取消
-              </Button>
-            </HStack>
-          </VStack>
-        </Box>
-      </Show>
-
-      <Show when={showAddForm()}>
-        <Box p="$3" borderRadius="$md" border="1px solid $neutral6" bg="$neutral2">
-          <VStack spacing="$3" alignItems="stretch">
-            <Text fontSize="$sm" fontWeight="$medium">添加到收藏文件夹</Text>
-            
-            {/* Folder Selection */}
-            <Box>
-              <Text fontSize="$xs" mb="$1" color="$neutral11">选择文件夹</Text>
-              <HStack spacing="$2">
-                <Box flex="1">
-                  <Select
-                    value={selectedFolderId()?.toString()}
-                    onChange={(value) => setSelectedFolderId(parseInt(value))}
-                  >
-                    <SelectTrigger>
-                      <SelectPlaceholder>选择收藏文件夹</SelectPlaceholder>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectListbox>
-                        <For each={folders()}>
-                          {(folder) => (
-                            <SelectOption value={folder.id.toString()}>
-                              <SelectOptionText>{folder.name}</SelectOptionText>
-                              <SelectOptionIndicator />
-                            </SelectOption>
-                          )}
-                        </For>
-                      </SelectListbox>
-                    </SelectContent>
-                  </Select>
-                </Box>
+      {/* 添加到收藏模态框 */}
+      <Modal opened={addToFavoriteModal.isOpen()} onClose={addToFavoriteModal.onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalCloseButton />
+          <ModalHeader>添加视频到收藏</ModalHeader>
+          <ModalBody>
+            <VStack spacing="$3" alignItems="stretch">
+              <Box>
+                <Text fontSize="$sm" mb="$2" fontWeight="$medium">选择收藏文件夹</Text>
+                <Select
+                  value={selectedFolderId()?.toString()}
+                  onChange={(value) => setSelectedFolderId(parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectPlaceholder>选择收藏文件夹</SelectPlaceholder>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectListbox>
+                      <For each={folders()}>
+                        {(folder) => (
+                          <SelectOption value={folder.id.toString()}>
+                            <SelectOptionText>{folder.name}</SelectOptionText>
+                            <SelectOptionIndicator />
+                          </SelectOption>
+                        )}
+                      </For>
+                    </SelectListbox>
+                  </SelectContent>
+                </Select>
                 <Button
                   size="sm"
-                  variant="outline"
-                  onClick={() => setShowNewFolderForm(!showNewFolderForm())}
+                  variant="ghost"
+                  mt="$2"
+                  onClick={createFolderModal.onOpen}
                 >
-                  {showNewFolderForm() ? "取消" : "新建文件夹"}
+                  + 新建收藏文件夹
                 </Button>
-              </HStack>
-            </Box>
-
-            {/* New Folder Form */}
-            <Show when={showNewFolderForm()}>
-              <Box p="$2" borderRadius="$md" bg="$neutral3">
-                <VStack spacing="$2" alignItems="stretch">
-                  <Text fontSize="$xs" fontWeight="$medium">创建新文件夹</Text>
-                  <Input
-                    size="sm"
-                    placeholder="文件夹名称"
-                    value={newFolderName()}
-                    onInput={(e) => setNewFolderName(e.currentTarget.value)}
-                  />
-                  <Input
-                    size="sm"
-                    placeholder="描述（可选）"
-                    value={newFolderDesc()}
-                    onInput={(e) => setNewFolderDesc(e.currentTarget.value)}
-                  />
-                  <HStack spacing="$2">
-                    <Button size="xs" onClick={handleCreateFolder}>
-                      创建
-                    </Button>
-                    <Button
-                      size="xs"
-                      variant="ghost"
-                      onClick={() => {
-                        setShowNewFolderForm(false)
-                        setNewFolderName("")
-                        setNewFolderDesc("")
-                      }}
-                    >
-                      取消
-                    </Button>
-                  </HStack>
-                </VStack>
               </Box>
-            </Show>
 
-            {/* Note */}
-            <Box>
-              <Text fontSize="$xs" mb="$1" color="$neutral11">备注（可选）</Text>
-              <Textarea
-                placeholder="添加备注信息"
-                value={note()}
-                onInput={(e) => setNote(e.currentTarget.value)}
-                rows={2}
-              />
-            </Box>
-
-            {/* Action Buttons */}
+              <Box>
+                <Text fontSize="$sm" mb="$2" fontWeight="$medium">备注（可选）</Text>
+                <Textarea
+                  placeholder="添加备注信息"
+                  value={note()}
+                  onInput={(e) => setNote(e.currentTarget.value)}
+                  rows={3}
+                />
+              </Box>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
             <HStack spacing="$2">
               <Button
-                size="sm"
                 onClick={handleAddToFavorite}
                 disabled={!selectedFolderId()}
                 colorScheme="accent"
@@ -315,20 +218,69 @@ export default function VideoFavoriteControl(props: VideoFavoriteControlProps) {
                 确认添加
               </Button>
               <Button
-                size="sm"
+                variant="ghost"
+                onClick={addToFavoriteModal.onClose}
+              >
+                取消
+              </Button>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* 新建文件夹模态框 */}
+      <Modal opened={createFolderModal.isOpen()} onClose={createFolderModal.onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalCloseButton />
+          <ModalHeader>新建视频收藏文件夹</ModalHeader>
+          <ModalBody>
+            <VStack spacing="$3" alignItems="stretch">
+              <Box>
+                <Text fontSize="$sm" mb="$2" fontWeight="$medium">
+                  文件夹名称 <Text as="span" color="$danger9">*</Text>
+                </Text>
+                <Input
+                  placeholder="输入文件夹名称"
+                  value={newFolderName()}
+                  onInput={(e) => setNewFolderName(e.currentTarget.value)}
+                />
+              </Box>
+              <Box>
+                <Text fontSize="$sm" mb="$2" fontWeight="$medium">描述（可选）</Text>
+                <Textarea
+                  placeholder="输入文件夹描述"
+                  value={newFolderDesc()}
+                  onInput={(e) => setNewFolderDesc(e.currentTarget.value)}
+                  rows={3}
+                />
+              </Box>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <HStack spacing="$2">
+              <Button
+                onClick={handleCreateFolder}
+                disabled={!newFolderName().trim()}
+                colorScheme="accent"
+              >
+                创建
+              </Button>
+              <Button
                 variant="ghost"
                 onClick={() => {
-                  setShowAddForm(false)
-                  setNote("")
+                  createFolderModal.onClose()
+                  setNewFolderName("")
+                  setNewFolderDesc("")
                 }}
               >
                 取消
               </Button>
             </HStack>
-          </VStack>
-        </Box>
-      </Show>
-    </VStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   )
 }
 

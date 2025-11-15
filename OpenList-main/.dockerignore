@@ -1,0 +1,16 @@
+# 忽略构建过程中不需要的文件
+# 注意：.git 目录需要保留，因为 build.sh 需要读取版本信息
+.gitignore
+README.md
+.vscode
+.idea
+*.log
+.DS_Store
+data/
+bin/
+dist/
+
+# 开发文件
+*.test.go
+*_test.go
+

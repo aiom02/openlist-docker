@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # 后端服务
+  openlist-backend:
+    build:
+      context: ./OpenList-main
+      dockerfile: Dockerfile
+    container_name: openlist-backend
+    restart: always
+    ports:
+      - "5244:5244"
+      - "5245:5245"
+    volumes:
+      - ./data:/opt/openlist/data
+    environment:
+      - UMASK=022
+      - TZ=Asia/Shanghai
+    networks:
+      - openlist-network
+
+  # 前端服务
+  openlist-frontend:
+    build:
+      context: ./OpenList-Frontend-main
+      dockerfile: Dockerfile
+    container_name: openlist-frontend
+    restart: always
+    ports:
+      - "66:80"
+    depends_on:
+      - openlist-backend
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - openlist-network
+
+networks:
+  openlist-network:
+    driver: bridge
+
+volumes:
+  openlist-data:
+    driver: local
+
