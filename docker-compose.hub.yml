@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # 后端服务 - 使用 Docker Hub 镜像
+  openlist-backend:
+    image: aiom02/openlist-backend:latest
+    container_name: openlist-backend
+    restart: always
+    ports:
+      - "5244:5244"
+      - "5245:5245"
+    volumes:
+      - ./data:/opt/openlist/data
+    environment:
+      - UMASK=022
+      - TZ=Asia/Shanghai
+    networks:
+      - openlist-network
+
+  # 前端服务 - 使用 Docker Hub 镜像
+  openlist-frontend:
+    image: aiom02/openlist-frontend:latest
+    container_name: openlist-frontend
+    restart: always
+    ports:
+      - "66:80"
+    depends_on:
+      - openlist-backend
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - openlist-network
+
+networks:
+  openlist-network:
+    driver: bridge
+
+volumes:
+  openlist-data:
+    driver: local
