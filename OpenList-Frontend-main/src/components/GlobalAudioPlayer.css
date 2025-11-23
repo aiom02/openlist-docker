@@ -1,0 +1,142 @@
+/* APlayer 暗黑模式样式 */
+.aplayer-dark .aplayer {
+  background: #1a1a1a !important;
+}
+
+.aplayer-dark .aplayer-body {
+  background: #1a1a1a !important;
+}
+
+.aplayer-dark .aplayer-pic {
+  background: #2a2a2a !important;
+}
+
+.aplayer-dark .aplayer-info {
+  border-top: 1px solid #333 !important;
+  background: #1a1a1a !important;
+}
+
+.aplayer-dark .aplayer-music {
+  color: #e0e0e0 !important;
+  background: transparent !important;
+}
+
+.aplayer-dark .aplayer-title {
+  color: #ffffff !important;
+}
+
+.aplayer-dark .aplayer-author {
+  color: #999 !important;
+}
+
+.aplayer-dark .aplayer-controller {
+  background: #1a1a1a !important;
+}
+
+.aplayer-dark .aplayer-controller .aplayer-bar-wrap {
+  background: #333 !important;
+}
+
+.aplayer-dark .aplayer-bar-wrap {
+  background: #333 !important;
+}
+
+.aplayer-dark .aplayer-played {
+  background: #1890ff !important;
+}
+
+.aplayer-dark .aplayer-loaded {
+  background: #444 !important;
+}
+
+.aplayer-dark .aplayer-list {
+  background: #1a1a1a !important;
+  border: 1px solid #333 !important;
+}
+
+.aplayer-dark .aplayer-list-light {
+  background: #2a2a2a !important;
+}
+
+.aplayer-dark .aplayer-list-light:hover {
+  background: #333 !important;
+}
+
+.aplayer-dark .aplayer-list ol li {
+  color: #e0e0e0 !important;
+  border-top: 1px solid #333 !important;
+}
+
+.aplayer-dark .aplayer-list ol li:hover {
+  background: #2a2a2a !important;
+}
+
+.aplayer-dark .aplayer-list ol li.aplayer-list-light {
+  background: #2a2a2a !important;
+}
+
+.aplayer-dark .aplayer-list-author {
+  color: #999 !important;
+}
+
+.aplayer-dark .aplayer-lrc {
+  color: #999 !important;
+}
+
+.aplayer-dark .aplayer-lrc p {
+  color: #999 !important;
+}
+
+.aplayer-dark .aplayer-lrc p.aplayer-lrc-current {
+  color: #ffffff !important;
+}
+
+.aplayer-dark .aplayer-miniswitcher {
+  background: #333 !important;
+}
+
+.aplayer-dark .aplayer-miniswitcher .aplayer-icon {
+  color: #e0e0e0 !important;
+}
+
+.aplayer-dark .aplayer-time {
+  color: #999 !important;
+}
+
+.aplayer-dark .aplayer-icon {
+  color: #e0e0e0 !important;
+}
+
+.aplayer-dark .aplayer-icon:hover {
+  color: #ffffff !important;
+}
+
+.aplayer-dark .aplayer-icon path {
+  fill: #e0e0e0 !important;
+}
+
+.aplayer-dark .aplayer-icon:hover path {
+  fill: #ffffff !important;
+}
+
+.aplayer-dark .aplayer-volume-wrap .aplayer-volume-bar-wrap {
+  background: #333 !important;
+}
+
+.aplayer-dark .aplayer-volume-bar {
+  background: #1890ff !important;
+}
+
+.aplayer-dark .aplayer-notice {
+  background: #2a2a2a !important;
+  color: #e0e0e0 !important;
+}
+
+/* 确保所有按钮在暗黑模式下可见 */
+.aplayer-dark button {
+  color: #e0e0e0 !important;
+}
+
+.aplayer-dark button:hover {
+  color: #ffffff !important;
+}

@@ -160,6 +160,15 @@ export function AudioMenuButton(props: AudioMenuButtonProps) {
                 {t("home.audio_menu.view_all_bookmarks")}
               </Button>
 
+              <Button
+                onClick={() => navigate("/audio-player")}
+                variant="outline"
+                w="$full"
+                colorScheme="accent"
+              >
+                🎵 音频播放器
+              </Button>
+
               <Box borderTop="1px solid $neutral6" pt="$4">
                 <Text fontSize="$lg" fontWeight="$semibold" mb="$3">
                   {t("home.audio_menu.add_to_favorites")}

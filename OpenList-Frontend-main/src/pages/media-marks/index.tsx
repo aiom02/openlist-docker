@@ -30,6 +30,7 @@ import { AiOutlineVideoCamera, AiOutlineArrowLeft, AiOutlineAudio, AiOutlineEdit
 import { BiRegularTimeFive } from "solid-icons/bi"
 import { IconButton } from "@hope-ui/solid"
 import { useNavigate } from "@solidjs/router"
+import { SimpleRightToolbar } from "~/components/SimpleRightToolbar"
 
 type MediaType = "video" | "audio"
 type MediaWithMarks = VideoWithMarks | AudioWithMarks
@@ -602,6 +603,9 @@ export default function MediaMarksPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      
+      {/* Right Toolbar */}
+      <SimpleRightToolbar />
     </Box>
   )
 }

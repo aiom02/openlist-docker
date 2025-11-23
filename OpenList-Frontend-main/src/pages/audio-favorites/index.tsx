@@ -32,6 +32,7 @@ import { notify, encodePath } from "~/utils"
 import { RiSystemDeleteBinLine } from "solid-icons/ri"
 import { AiOutlineAudio, AiOutlineArrowLeft } from "solid-icons/ai"
 import { useNavigate } from "@solidjs/router"
+import { SimpleRightToolbar } from "~/components/SimpleRightToolbar"
 
 export default function AudioFavoritesPage() {
   const t = useT()
@@ -366,6 +367,9 @@ export default function AudioFavoritesPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      
+      {/* Right Toolbar */}
+      <SimpleRightToolbar />
     </Box>
   )
 }

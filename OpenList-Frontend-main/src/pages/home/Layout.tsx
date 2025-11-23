@@ -1,4 +1,4 @@
-import { Markdown } from "~/components"
+import { Markdown, FloatingPlayerButton } from "~/components"
 import { useTitle } from "~/hooks"
 import { getSetting } from "~/store"
 import { notify } from "~/utils"
@@ -26,6 +26,7 @@ const Index = () => {
       <Toolbar />
       <Body />
       <Footer />
+      <FloatingPlayerButton />
     </>
   )
 }

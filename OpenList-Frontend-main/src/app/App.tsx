@@ -26,6 +26,7 @@ const Login = lazy(() => import("~/pages/login"))
 const Favorites = lazy(() => import("~/pages/favorites"))
 const VideoFavorites = lazy(() => import("~/pages/video-favorites"))
 const AudioFavorites = lazy(() => import("~/pages/audio-favorites"))
+const AudioPlayer = lazy(() => import("~/pages/audio-player"))
 const MediaMarks = lazy(() => import("~/pages/media-marks"))
 const Test = lazy(() => import("~/pages/test"))
 
@@ -117,6 +118,14 @@ const App: Component = () => {
                 <MustUser>
                   <AudioFavorites />
                 </MustUser>
+              }
+            />
+            <Route
+              path="/audio-player"
+              element={
+                <UserOrGuest>
+                  <AudioPlayer />
+                </UserOrGuest>
               }
             />
             <Route

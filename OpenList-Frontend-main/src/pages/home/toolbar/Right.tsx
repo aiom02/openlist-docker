@@ -1,4 +1,4 @@
-import { Box, createDisclosure, VStack } from "@hope-ui/solid"
+import { Box, createDisclosure, VStack, useColorMode } from "@hope-ui/solid"
 import { createMemo, Show } from "solid-js"
 import { RightIcon } from "./Icon"
 import { CgMoreO } from "solid-icons/cg"
@@ -7,9 +7,10 @@ import { objStore, selectAll, State, toggleCheckbox, userCan, me } from "~/store
 import { bus } from "~/utils"
 import { operations } from "./operations"
 import { IoMagnetOutline } from "solid-icons/io"
-import { AiOutlineCloudUpload, AiOutlineSetting, AiOutlineHeart, AiOutlineAudio } from "solid-icons/ai"
-import { BsBookmarks } from "solid-icons/bs"
+import { AiOutlineCloudUpload, AiOutlineSetting, AiOutlineHeart } from "solid-icons/ai"
+import { BsBookmarks, BsMoon, BsSun, BsPlayCircle } from "solid-icons/bs"
 import { RiSystemRefreshLine } from "solid-icons/ri"
+import { BiRegularArrowBack } from "solid-icons/bi"
 import { usePath, useRouter } from "~/hooks"
 import { Motion } from "solid-motionone"
 import { isTocVisible, setTocDisabled } from "~/components"
@@ -24,14 +25,28 @@ export const Right = () => {
   })
   const margin = createMemo(() => (isOpen() ? "$4" : "$5"))
   const isFolder = createMemo(() => objStore.state === State.Folder)
-  const { refresh } = usePath()
+  
+  // 安全地获取refresh函数，如果不在文件浏览页面则使用空函数
+  let refresh: (() => void)
+  try {
+    const pathHook = usePath()
+    refresh = () => pathHook.refresh(undefined, true)
+  } catch (e) {
+    refresh = () => window.location.reload()
+  }
+  
   const { isShare } = useRouter()
   const navigate = useNavigate()
+  const { colorMode, toggleColorMode } = useColorMode()
   
   const isLoggedIn = createMemo(() => {
     const user = me()
-    return user && user.id && !user.guest
+    return user && user.id
   })
+  
+  const handleGoBack = () => {
+    window.history.back()
+  }
   return (
     <Box
       class="left-toolbar-box"
@@ -70,9 +85,12 @@ export const Right = () => {
             <RightIcon
               as={RiSystemRefreshLine}
               tips="refresh"
-              onClick={() => {
-                refresh(undefined, true)
-              }}
+              onClick={refresh}
+            />
+            <RightIcon
+              as={BiRegularArrowBack}
+              tips="go_back"
+              onClick={handleGoBack}
             />
             <Show
               when={
@@ -164,6 +182,18 @@ export const Right = () => {
                 }}
               />
             </Show>
+            <RightIcon
+              as={BsPlayCircle}
+              tips="audio_player"
+              onClick={() => {
+                navigate("/audio-player")
+              }}
+            />
+            <RightIcon
+              as={colorMode() === "dark" ? BsSun : BsMoon}
+              tips={colorMode() === "dark" ? "light_mode" : "dark_mode"}
+              onClick={toggleColorMode}
+            />
             <RightIcon
               tips="toggle_checkbox"
               as={TbCheckbox}

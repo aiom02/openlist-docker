@@ -47,6 +47,7 @@ import { notify, encodePath } from "~/utils"
 import { RiSystemDeleteBinLine } from "solid-icons/ri"
 import { AiOutlineVideoCamera, AiOutlineArrowLeft, AiOutlineAudio, AiOutlinePicture } from "solid-icons/ai"
 import { useNavigate } from "@solidjs/router"
+import { SimpleRightToolbar } from "~/components/SimpleRightToolbar"
 
 type MediaType = "video" | "audio" | "image"
 type FavoriteFolder = VideoFavoriteFolder | AudioFavoriteFolder | ImageFavoriteFolder
@@ -529,6 +530,9 @@ export default function FavoritesPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      
+      {/* Right Toolbar */}
+      <SimpleRightToolbar />
     </Box>
   )
 }

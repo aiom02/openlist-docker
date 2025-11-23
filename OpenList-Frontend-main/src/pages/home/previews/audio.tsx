@@ -1,7 +1,7 @@
 import "aplayer/dist/APlayer.min.css"
 import "./audio.css"
 import APlayer from "aplayer"
-import { Box, VStack, HStack } from "@hope-ui/solid"
+import { Box, VStack, HStack, Button } from "@hope-ui/solid"
 import { onCleanup, onMount } from "solid-js"
 import { useLink, useRouter, useTitle } from "~/hooks"
 import { getMainColor, getSetting, getSettingBool, objStore, me } from "~/store"
@@ -9,10 +9,12 @@ import { ObjType, StoreObj } from "~/types"
 import { baseName, fsGet } from "~/utils"
 import MediaMarks from "~/components/MediaMarks"
 import { AudioFavoriteControl } from "~/components"
+import { addToPlaylist, type PlaylistItem } from "~/store/playlist"
+import { notify } from "~/utils"
 
 const Preview = () => {
   const { proxyLink, rawLink, previewPage } = useLink()
-  const { searchParams } = useRouter()
+  const { searchParams, pathname } = useRouter()
   let audios = objStore.objs.filter((obj) => obj.type === ObjType.AUDIO)
   if (audios.length === 0 || searchParams["from"] === "search") {
     audios = [objStore.obj]
@@ -152,10 +154,77 @@ const Preview = () => {
     return user && user.id && !user.guest
   }
   
+  const handleAddToPlaylist = () => {
+    if (!ap || !ap.list.audios[ap.list.index]) {
+      notify.error("无法获取当前音频信息")
+      return
+    }
+    
+    const currentAudio = ap.list.audios[ap.list.index]
+    const currentObj = audios[ap.list.index]
+    
+    // 构建完整路径（包含storage信息）
+    let fullPath: string
+    
+    if (audios.length === 1 || searchParams["from"] === "search") {
+      // 单个音频，直接使用pathname()
+      fullPath = pathname()
+    } else {
+      // 文件夹中的多个音频
+      // currentObj.path 可能是相对路径（如 \jok\地铁\xxx）或完整路径
+      if (currentObj.path.startsWith('/')) {
+        // 已经是完整路径（正斜杠开头）
+        fullPath = currentObj.path
+      } else if (currentObj.path.startsWith('\\')) {
+        // Windows风格的相对路径，转换为正斜杠并添加storage前缀
+        // 从pathname()中提取storage前缀（第一段路径）
+        const pathParts = pathname().split('/').filter(p => p)
+        const storageName = pathParts[0] || ''
+        // 转换反斜杠为正斜杠
+        const normalizedPath = currentObj.path.replace(/\\/g, '/')
+        fullPath = `/${storageName}${normalizedPath}`
+      } else {
+        // 其他情况，使用pathname作为基础
+        fullPath = `${pathname()}/${currentObj.path}`
+      }
+    }
+    
+    console.log("📝 添加到播放列表:")
+    console.log("  - 文件名:", currentAudio.name)
+    console.log("  - 原始路径:", currentObj.path)
+    console.log("  - 当前目录:", pathname())
+    console.log("  - 完整路径:", fullPath)
+    console.log("  - 大小:", currentObj.size)
+    
+    const playlistItem: PlaylistItem = {
+      id: `${fullPath}-${Date.now()}`,
+      name: currentAudio.name,
+      artist: currentAudio.artist || "Unknown",
+      url: currentAudio.url,
+      cover: currentAudio.cover,
+      lrc: currentAudio.lrc,
+      path: fullPath,
+      storage_id: 0, // Will be filled by backend based on path
+      size: currentObj.size,
+    }
+    
+    addToPlaylist(playlistItem)
+    notify.success("已添加到播放列表")
+  }
+  
   return (
     <VStack w="$full" spacing="$4" alignItems="stretch">
       <Box w="$full" id="audio-player" />
-      <AudioFavoriteControl isLoggedIn={isLoggedIn()} />
+      <HStack w="$full" justifyContent="space-between">
+        <Button
+          size="sm"
+          colorScheme="accent"
+          onClick={handleAddToPlaylist}
+        >
+          添加到播放列表
+        </Button>
+        <AudioFavoriteControl isLoggedIn={isLoggedIn()} />
+      </HStack>
       <MediaMarks
         onJumpTo={handleJumpToTime}
         getCurrentTime={getCurrentTime}
