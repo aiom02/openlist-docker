@@ -27,3 +27,4 @@ type VideoFavorite struct {
 	Fingerprint  string    `json:"fingerprint" gorm:"index"`      // for linking with media marks
 	CreatedAt    time.Time `json:"created_at"`
 }
+

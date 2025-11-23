@@ -100,3 +100,4 @@ func DeleteVideoFavoriteById(id uint, userId uint) error {
 	}
 	return nil
 }
+

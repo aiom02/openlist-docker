@@ -1,0 +1,95 @@
+═══════════════════════════════════════════════════════════════
+                OpenList 一键部署指南
+═══════════════════════════════════════════════════════════════
+
+📦 你已经拥有的文件：
+  ✅ docker-compose.yml    - Docker 配置
+  ✅ deploy.sh             - 一键部署脚本
+  ✅ README.md             - 项目说明
+  ✅ .gitignore            - Git 忽略配置
+
+═══════════════════════════════════════════════════════════════
+                第一步：上传到 GitHub
+═══════════════════════════════════════════════════════════════
+
+1. 打开命令行，进入项目目录：
+   cd d:\SoftwareDevelopment\Project\openList__Tag_Synchronization
+
+2. 初始化 Git：
+   git init
+
+3. 添加所有文件：
+   git add .
+
+4. 提交：
+   git commit -m "feat: OpenList 完整项目 - 前后端 + Docker 一键部署"
+
+5. 在 GitHub 上创建新仓库：
+   - 访问: https://github.com/new
+   - 仓库名: openlist-docker
+   - 类型: Public
+
+6. 添加远程仓库（替换 YOUR_USERNAME）：
+   git remote add origin https://github.com/YOUR_USERNAME/openlist-docker.git
+
+7. 推送到 GitHub：
+   git push -u origin main
+
+═══════════════════════════════════════════════════════════════
+                第二步：在 Linux 服务器上部署
+═══════════════════════════════════════════════════════════════
+
+🚀 一行命令部署（最简单）：
+
+git clone https://github.com/YOUR_USERNAME/openlist-docker.git && cd openlist-docker && chmod +x deploy.sh && ./deploy.sh
+
+或者分步执行：
+
+1. 克隆项目：
+   git clone https://github.com/YOUR_USERNAME/openlist-docker.git
+
+2. 进入目录：
+   cd openlist-docker
+
+3. 赋予执行权限：
+   chmod +x deploy.sh
+
+4. 运行部署脚本：
+   ./deploy.sh
+
+═══════════════════════════════════════════════════════════════
+                部署完成后
+═══════════════════════════════════════════════════════════════
+
+访问地址：
+  前端:   http://你的服务器IP:66
+  后端:   http://你的服务器IP:5244
+  管理:   http://你的服务器IP:5245
+
+常用命令：
+  查看日志:  docker-compose logs -f
+  停止服务:  docker-compose down
+  重启服务:  docker-compose restart
+  更新代码:  git pull && docker-compose up -d --build
+
+═══════════════════════════════════════════════════════════════
+                特点
+═══════════════════════════════════════════════════════════════
+
+✅ 前后端打包在一起（一个 docker-compose.yml）
+✅ 一条命令完成部署
+✅ 自动检查环境
+✅ 自动构建镜像
+✅ 自动启动服务
+✅ 数据持久化（./data 目录）
+
+═══════════════════════════════════════════════════════════════
+                需要帮助？
+═══════════════════════════════════════════════════════════════
+
+查看详细文档：
+  - README_DEPLOYMENT.md  （完整部署文档）
+  - QUICK_START.md        （快速启动指南）
+  - DEPLOYMENT_SUMMARY.md （部署方案总结）
+
+═══════════════════════════════════════════════════════════════
